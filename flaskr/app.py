@@ -2,6 +2,7 @@ from flaskr import create_app
 from .modelos import db, Album, Medio
 from .modelos import AlbumSchema
 
+#LINK para acceder a la explicacion teorica en prezi https://prezi.com/i/uhrp65hnbmwh/
 app = create_app("default")
 app_context = app.app_context()
 app_context.push()
