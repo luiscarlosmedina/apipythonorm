@@ -2,32 +2,40 @@ from flask_sqlalchemy import SQLAlchemy
 import enum
 
 db = SQLAlchemy()
-
-class Cancion(db.Model):
-    id = db.Column(db.Integer, primary_key = True)
-    titulo = db.Column(db.String(128))
-    minutos = db.Column(db.Integer)
-    segundos = db.Column(db.Integer)
-    interprete = db.Column(db.String(128))
-
-
 class Medio(enum.Enum):
     DISCO = 1
     CASETE = 2
     CD = 3
+
+
 class Album(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     titulo = db.Column(db.String(128))
     anho = db.Column(db.Integer)
     descripcion = db.Column(db.String(100))
     medio = db.Column(db.Enum(Medio))
-    id_usuario = db.Column(db.Integer, db.ForeignKey("usuario.id"))
-    __tables_args__=(db.UniqueConstraint("usuario","titulo", name="titulo_unico_album"),)
+    usuario = db.Column(db.Integer, db.ForeignKey("usuario.id"))
+    canciones = db.relationship('Cancion', secondary='album_cancion', back_populates='albunes')
+    __tables_args__ = (db.UniqueConstraint("usuario", "titulo", name="titulo_unico_album"),)
+
+class Cancion(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    titulo = db.Column(db.String(128))
+    minutos = db.Column(db.Integer)
+    segundos = db.Column(db.Integer)
+    interprete = db.Column(db.String(128))
+    albunes = db.relationship('Album', secondary='album_cancion', back_populates='canciones')
+
+
+
+albunes_canciones = db.Table('album_cancion',\
+    db.Column('album_id', db.Integer, db.ForeignKey('album.id'), primary_key=True),\
+    db.Column('cancion_id', db.Integer, db.ForeignKey('cancion.id'), primary_key=True))
+
 
 
 class Usuario(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    nombre= db.Column(db.String(128))
+    nombre = db.Column(db.String(128))
     contrasenha = db.Column(db.String(128))
     albunes = db.relationship('Album', cascade='all, delete, delete-orphan')
-
